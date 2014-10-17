@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="action_settings">Settings</string>
+  <string name="app_name">Quiz</string>
+  <string name="hello_world">Hello world!</string>
+  <string name="service_name">Timer Service</string>
+  <string-array name="reg_post_array">
+    <item>Developer</item>
+    <item>Designer</item>
+  </string-array>
+</resources>
