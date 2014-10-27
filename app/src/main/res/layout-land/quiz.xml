@@ -129,54 +129,6 @@
                         android:gravity="left"
                         android:layout_weight="1">
 
-                        <RadioButton
-                            android:layout_width="match_parent"
-                            android:id="@+id/radio0"
-                            android:layout_height="wrap_content"
-                            android:button="@null"
-                            android:background="@drawable/radio"
-                            android:text="A. Database application and the database"
-                            android:padding="10dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
-                            android:textSize="12sp" />
-
-                        <RadioButton
-                            android:id="@+id/radio1"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:button="@null"
-                            android:background="@drawable/radio"
-                            android:text="B. Data and the database"
-                            android:padding="10dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
-                            android:textSize="12sp" />
-
-                        <RadioButton
-                            android:layout_width="match_parent"
-                            android:id="@+id/radio2"
-                            android:layout_height="wrap_content"
-                            android:button="@null"
-                            android:background="@drawable/radio"
-                            android:text="C. The user and the database application"
-                            android:padding="10dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
-                            android:textSize="12sp" />
-
-                        <RadioButton
-                            android:layout_width="match_parent"
-                            android:id="@+id/radio3"
-                            android:layout_height="wrap_content"
-                            android:button="@null"
-                            android:background="@drawable/radio"
-                            android:text="D. Database application and SQL"
-                            android:padding="10dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="5dp"
-                            android:textSize="12sp" />
-
                     </RadioGroup>
 
                     <Button

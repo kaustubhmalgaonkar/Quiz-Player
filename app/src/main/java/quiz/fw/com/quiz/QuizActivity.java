@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -26,16 +27,26 @@ import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import quiz.fw.com.Database.DatabaseHelper;
+import quiz.fw.com.Database.Quiz;
 import quiz.fw.com.R;
 import quiz.fw.com.controller.AppController;
 import quiz.fw.com.utils.CommonFunctions;
@@ -45,17 +56,15 @@ import quiz.fw.com.utils.TimerService;
 /**
  * Created by kaustubh on 9/10/14.
  */
-public class QuizActivity extends Activity implements CompoundButton.OnCheckedChangeListener,View.OnClickListener {
+public class QuizActivity extends Activity implements View.OnClickListener {
 
   private DatabaseHelper db;
   private TextView txtQuizQuestion,txtQuizQuestionNo,txtQuestionProgress,txtNavLabel,txtTimer;
   private Button btnSubmit,btnSkip;
   private ImageButton btnNavigator;
   private ProgressBar progressbarQuestionStatus;
-  private RadioButton radio0,radio1,radio2,radio3;
   private ProgressDialog pDialog;
   private String TAG = QuizActivity.class.getSimpleName();
-  String correctAnswer,selectedAnswer="";
   Integer no_of_questions;
   RadioGroup rg;
   private List<Integer> ids = new ArrayList<Integer>();
@@ -65,11 +74,12 @@ public class QuizActivity extends Activity implements CompoundButton.OnCheckedCh
   private FrameLayout frameNavigator;
   private RelativeLayout relativeNavigator;
   JSONObject resultJsonObj;
-  private JSONArray responseArr,resultArr;
+  private JSONArray responseArr,resultArr,options;
   private Integer questionCnt = 0;
   private Integer userID;
   private Integer qID;
   private Integer [] radioBtnId;
+  private String designation;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +91,7 @@ public class QuizActivity extends Activity implements CompoundButton.OnCheckedCh
     Intent extras = getIntent();
     if (extras != null) {
       userID = Integer.parseInt(extras.getStringExtra("userID"));
+      designation = extras.getStringExtra("designation");
     }
 
     resultArr = new JSONArray();
@@ -100,15 +111,6 @@ public class QuizActivity extends Activity implements CompoundButton.OnCheckedCh
     relativeNavigator = (RelativeLayout) findViewById(R.id.navigatorLayout);
 
     rg = (RadioGroup) findViewById(R.id.quiz_rgOpinion);
-
-    radio0 = (RadioButton) findViewById(R.id.radio0);
-    radio0.setOnCheckedChangeListener(this);
-    radio1 = (RadioButton) findViewById(R.id.radio1);
-    radio1.setOnCheckedChangeListener(this);
-    radio2 = (RadioButton) findViewById(R.id.radio2);
-    radio2.setOnCheckedChangeListener(this);
-    radio3 = (RadioButton) findViewById(R.id.radio3);
-    radio3.setOnCheckedChangeListener(this);
 
     btnSubmit = (Button) findViewById(R.id.quiz_btnSubmit);
     btnSubmit.setOnClickListener(this);
@@ -177,10 +179,8 @@ public class QuizActivity extends Activity implements CompoundButton.OnCheckedCh
     }
   }
 
-  public void radioTextColorChange(boolean b, RadioButton radioBtn,String separator){
+  public void radioTextColorChange(boolean b, RadioButton radioBtn){
     if(b) {
-      String[] ans = radioBtn.getText().toString().split(separator);
-      selectedAnswer= ans[1];
       radioBtn.setTextColor(getResources().getColor(R.color.white));
     }else {
       radioBtn.setTextColor(getResources().getColor(R.color.black));
@@ -204,26 +204,26 @@ public class QuizActivity extends Activity implements CompoundButton.OnCheckedCh
     try{
       switch (view.getId()) {
         case R.id.quiz_btnSubmit:
-          if(!selectedAnswer.isEmpty()) {
-            resultJsonObj.put("id",qID);
+          Log.e("radio",""+rg.getCheckedRadioButtonId());
+          if(rg.getCheckedRadioButtonId() != -1){
+            resultJsonObj.put("question_id",qID);
             radioBtnId[questionCnt] = rg.getCheckedRadioButtonId();
             questionCnt++;
-            if (selectedAnswer.trim().equals(correctAnswer)) {
-              resultJsonObj.put("answer","correct");
-            } else {
-              resultJsonObj.put("answer","wrong");
+            for (int i = 0;i<options.length();i++){
+              JSONObject json = options.getJSONObject(i);
+              resultJsonObj.put("answer",json.getString("option_id"));
             }
+
             resultJsonObj.remove("status");
             resultJsonObj.put("status","taken");
-            selectedAnswer = "";
+
           }
           break;
 
         case R.id.quiz_btnSkip:
-          resultJsonObj.put("id",qID);
+          resultJsonObj.put("question_id",qID);
           radioBtnId[questionCnt] = 0;
           questionCnt++;
-          selectedAnswer = "";
           resultJsonObj.remove("status");
           resultJsonObj.put("status","skipped");
           break;
@@ -244,14 +244,17 @@ public class QuizActivity extends Activity implements CompoundButton.OnCheckedCh
           }
           break;
       }
-      if(resultJsonObj.has("status")){
-        resultArr.put(questionCnt-1,resultJsonObj);
+
+      if(resultJsonObj != null && resultJsonObj.has("status")){
+        if(rg.getCheckedRadioButtonId() != -1)
+          resultArr.put(questionCnt-1,resultJsonObj);
         if(btnSubmit.getText().equals("Finish") && btnSkip.getText().equals("Skip and Finish")){
           db.updateUserResult(userID,resultArr.toString());
           startCompletionActivity();
+        }else{
+          loadQuestion(questionCnt);
+          generateNavigator(responseArr);
         }
-        loadQuestion(questionCnt);
-        generateNavigator(responseArr);
       }
       Log.e("Result Array", "" + resultArr.toString());
     }catch (JSONException e){
@@ -264,6 +267,7 @@ public class QuizActivity extends Activity implements CompoundButton.OnCheckedCh
     super.onSaveInstanceState(outState);
     outState.putInt("questionCnt", questionCnt);
     outState.putString("responseArr",responseArr.toString());
+    outState.putString("responseArr",options.toString());
     outState.putString("resultArr",resultArr.toString());
     outState.putInt("radioBtnID",rg.getCheckedRadioButtonId());
     outState.putSerializable("radioBtnId", radioBtnId);
@@ -275,6 +279,7 @@ public class QuizActivity extends Activity implements CompoundButton.OnCheckedCh
     questionCnt = savedInstanceState.getInt("questionCnt");
     try {
       responseArr = new JSONArray(savedInstanceState.getString("responseArr"));
+      options = new JSONArray(savedInstanceState.getString("options"));
       resultArr = new JSONArray(savedInstanceState.getString("resultArr"));
       generateNavigator(responseArr);
     }catch (JSONException e){
@@ -286,27 +291,6 @@ public class QuizActivity extends Activity implements CompoundButton.OnCheckedCh
     if(savedInstanceState.getInt("radioBtnID") != -1){
       RadioButton rBtn=(RadioButton)rg.findViewById(savedInstanceState.getInt("radioBtnID"));
       rBtn.setChecked(true);
-    }
-  }
-
-  @Override
-  public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-    switch(compoundButton.getId()){
-      case R.id.radio0:
-        radioTextColorChange(b,radio0,"A.");
-        break;
-
-      case R.id.radio1:
-        radioTextColorChange(b,radio1,"B.");
-        break;
-
-      case R.id.radio2:
-        radioTextColorChange(b,radio2,"C.");
-        break;
-
-      case R.id.radio3:
-        radioTextColorChange(b,radio3,"D.");
-        break;
     }
   }
 
@@ -343,36 +327,50 @@ public class QuizActivity extends Activity implements CompoundButton.OnCheckedCh
 
       JSONObject responseObj = responseArr.getJSONObject(questionCnt);
       no_of_questions = responseArr.length();
-      qID = Integer.parseInt(responseObj.getString("id"));
-      correctAnswer = responseObj.getString("correct");
+      qID = Integer.parseInt(responseObj.getString("question_id"));
       txtQuizQuestionNo.setText(Integer.toString(questionCnt+1));
       txtQuizQuestion.setText(responseObj.getString("question"));
       txtQuestionProgress.setText(questionCnt+1+" of "+no_of_questions);
 
       progressbarQuestionStatus.setProgress(100/(2/(questionCnt+1)));
 
-      JSONArray options = responseObj.getJSONArray("options");
+      options = responseObj.getJSONArray("options");
       rg.clearCheck();
-      if(radioBtnId[questionCnt] != null && radioBtnId[questionCnt]!=0){
-        rg.check(radioBtnId[questionCnt]);
+      rg.removeAllViews();
+      for(int i=0;i < options.length();i++){
+        JSONObject json = options.getJSONObject(i);
+
+        RadioGroup.LayoutParams params_soiled = new RadioGroup.LayoutParams(getBaseContext(), null);
+        params_soiled.setMargins(0,5,0,5);
+
+        RadioButton rdBtn = new RadioButton(this);
+        rdBtn.setId(i);
+        rdBtn.setText(String.valueOf(Character.toChars(65 + i)) + ". " + json.getString("option"));
+        rdBtn.setButtonDrawable(new StateListDrawable());
+        rdBtn.setBackgroundResource(R.drawable.radio);
+        rdBtn.setPadding(10, 10, 10, 10);
+        rdBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        rdBtn.setLayoutParams(params_soiled);
+        rdBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+          @Override
+          public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+
+          }
+        });
+        if(radioBtnId[questionCnt] != null && radioBtnId[questionCnt] == i)
+          rdBtn.setChecked(true);
+
+        rg.addView(rdBtn);
+      }
+
+      if(radioBtnId[questionCnt] != null){
         btnSkip.setVisibility(View.GONE);
       }else{
         resultJsonObj.put("status","activated");
         resultArr.put(questionCnt,resultJsonObj);
-        Log.e("load",resultArr.toString());
         btnSkip.setVisibility(View.VISIBLE);
       }
-      for(int i=0;i < options.length();i++){
-        if(i == 0){
-          radio0.setText("A. " + options.getString(i));
-        }else if(i == 1){
-          radio1.setText("B. " + options.getString(i));
-        }else if(i == 2){
-          radio2.setText("C. " + options.getString(i));
-        }else{
-          radio3.setText("D. " + options.getString(i));
-        }
-      }
+
       if(no_of_questions-1 == questionCnt){
         btnSkip.setText("Skip and Finish");
         btnSkip.setPadding(10,0,10,0);
@@ -459,7 +457,44 @@ public class QuizActivity extends Activity implements CompoundButton.OnCheckedCh
     }
   }
 
+  private void postData(){
+
+    if(CommonFunctions.checkNetworkConnection(this)){
+      StringRequest postRequest = new StringRequest(Request.Method.POST,Constants.urlQuizUserSave, new Response.Listener<String>() {
+        @Override
+        public void onResponse(String response) {
+        }
+      }, new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+        }
+      }){
+        @Override
+        protected Map<String,String> getParams(){
+          Quiz userData = db.getUserDetails(userID);
+          Map<String, String> jsonParams = new HashMap<String, String>();
+          jsonParams.put("name", userData.getName());
+          jsonParams.put("phone", userData.getPhone());
+          jsonParams.put("email", userData.getEmail());
+          jsonParams.put("post_applied", userData.getPost_applied());
+          jsonParams.put("result", userData.getResult());
+
+          return jsonParams;
+        }
+
+        @Override
+        public Map<String, String> getHeaders() throws AuthFailureError {
+          Map<String,String> params = new HashMap<String, String>();
+          params.put("Content-Type","application/x-www-form-urlencoded");
+          return params;
+        }
+      };
+      AppController.getInstance().addToRequestQueue(postRequest);
+    }
+  }
+
   private void startCompletionActivity(){
+//    postData();
     Intent i = new Intent(getApplicationContext(),CompletionActivity.class);
     startActivity(i);
     finish();

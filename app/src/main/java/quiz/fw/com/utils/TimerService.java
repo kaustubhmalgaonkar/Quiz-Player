@@ -28,23 +28,25 @@ public class TimerService extends Service {
   @Override
   public void onStart(Intent intent, int startId) {
     super.onStart(intent, startId);
-    Integer minutes = intent.getIntExtra("minutes",0);
-    new CountDownTimer(minutes*60000, 1000) { // adjust the milli seconds here
+    if(intent != null){
+      Integer minutes = intent.getIntExtra("minutes",0);
+      new CountDownTimer(minutes*60000, 1000) { // adjust the milli seconds here
 
-      public void onTick(long millisUntilFinished) {
-        String time= String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)));
-        intentTimer.putExtra("time",time);
-        sendBroadcast(intentTimer);
-      }
+        public void onTick(long millisUntilFinished) {
+          String time= String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+              TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+              TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)));
+          intentTimer.putExtra("time",time);
+          sendBroadcast(intentTimer);
+        }
 
-      public void onFinish() {
-        TimerService.this.stopSelf();
-        intentTimer.putExtra("time","finish");
-        sendBroadcast(intentTimer);
-      }
-    }.start();
+        public void onFinish() {
+          TimerService.this.stopSelf();
+          intentTimer.putExtra("time","finish");
+          sendBroadcast(intentTimer);
+        }
+      }.start();
+    }
   }
 
   @Override

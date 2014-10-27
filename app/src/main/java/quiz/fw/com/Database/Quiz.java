@@ -26,6 +26,14 @@ public class Quiz {
     this.post_applied = post_applied;
   }
 
+  public Quiz(String name, String email, String phone, String post_applied,String result){
+    this.name = name;
+    this.email = email;
+    this.phone = phone;
+    this.post_applied = post_applied;
+    this.result = result;
+  }
+
   public Integer getUId() {
     return uId;
   }

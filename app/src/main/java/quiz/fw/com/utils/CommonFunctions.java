@@ -20,6 +20,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import quiz.fw.com.controller.AppController;
 
@@ -73,7 +75,7 @@ public class CommonFunctions {
     return false;
   }
 
-  private void postUserData(final Context context,String url,Map<String, String> jsonParams){
+  private void postData(final Context context,String url,Map<String, String> jsonParams){
 
     JsonObjectRequest myRequest = new JsonObjectRequest(
         Request.Method.POST,
@@ -105,4 +107,13 @@ public class CommonFunctions {
     AppController.getInstance().addToRequestQueue(myRequest, Constants.tag_json_obj);
   }
 
+  // validating email id
+  public static boolean isValidEmail(String email) {
+    String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+        + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+
+    Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+    Matcher matcher = pattern.matcher(email);
+    return matcher.matches();
+  }
 }

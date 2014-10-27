@@ -2,6 +2,7 @@ package quiz.fw.com.Database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -73,5 +74,21 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     Log.i("Database", "Updated Result");
 
     return updatedId;
+  }
+
+  // Getting single user data
+  public Quiz getUserDetails(int id) {
+    SQLiteDatabase db = this.getReadableDatabase();
+
+    Cursor cursor = db.query(TABLE_USER_DETAIL, new String[] { KEY_name,
+            KEY_email, KEY_mobile,KEY_post,KEY_RESULT }, KEY_UID + "=?",
+        new String[] { String.valueOf(id) }, null, null, null, null);
+    if (cursor != null)
+      cursor.moveToFirst();
+
+    Quiz userData = new Quiz(cursor.getString(0),
+        cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4));
+
+    return userData;
   }
 }

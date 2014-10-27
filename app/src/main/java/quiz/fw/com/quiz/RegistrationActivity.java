@@ -70,6 +70,7 @@ public class RegistrationActivity extends Activity {
           Toast.makeText(getApplicationContext(), "Data Saved Successfully", Toast.LENGTH_LONG).show();
           Intent intent = new Intent(getApplicationContext(), QuizActivity.class);
           intent.putExtra("userID",Long.toString(insertedId));
+          intent.putExtra("designation", spPostApplied.getSelectedItem().toString());
           startActivity(intent);
           finish();
         }
