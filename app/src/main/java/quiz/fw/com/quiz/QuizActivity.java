@@ -27,8 +27,6 @@ import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -36,7 +34,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,7 +56,7 @@ import quiz.fw.com.utils.TimerService;
 public class QuizActivity extends Activity implements View.OnClickListener {
 
   private DatabaseHelper db;
-  private TextView txtQuizQuestion,txtQuizQuestionNo,txtQuestionProgress,txtNavLabel,txtTimer;
+  private TextView txtQuizQuestion,txtQuestionProgress,txtNavLabel,txtTimer;
   private Button btnSubmit,btnSkip;
   private ImageButton btnNavigator;
   private ProgressBar progressbarQuestionStatus;
@@ -100,7 +97,6 @@ public class QuizActivity extends Activity implements View.OnClickListener {
     tableNavigatorLayout.removeAllViews();
 
     txtQuizQuestion = (TextView) findViewById(R.id.quiz_txtQuestion);
-    txtQuizQuestionNo = (TextView) findViewById(R.id.quiz_txtQuestionNo);
     txtQuestionProgress = (TextView) findViewById(R.id.quiz_txtCurrentQuestion);
     txtTimer = (TextView) findViewById(R.id.quiz_txtTimer);
     txtNavLabel = (TextView) findViewById(R.id.quiz_txtNavLabel);
@@ -173,7 +169,7 @@ public class QuizActivity extends Activity implements View.OnClickListener {
       makeJsonArrayReq();
       if(!CommonFunctions.isServiceRunning(TimerService.class,this)) {
         Intent intentService = new Intent(this, TimerService.class);
-        intentService.putExtra("minutes",1);
+        intentService.putExtra("minutes",30);
         startService(intentService);
       }
     }
@@ -206,26 +202,23 @@ public class QuizActivity extends Activity implements View.OnClickListener {
         case R.id.quiz_btnSubmit:
           Log.e("radio",""+rg.getCheckedRadioButtonId());
           if(rg.getCheckedRadioButtonId() != -1){
-            resultJsonObj.put("question_id",qID);
+            resultJsonObj.put("q_id",qID);
             radioBtnId[questionCnt] = rg.getCheckedRadioButtonId();
             questionCnt++;
-            for (int i = 0;i<options.length();i++){
-              JSONObject json = options.getJSONObject(i);
-              resultJsonObj.put("answer",json.getString("option_id"));
-            }
+            JSONObject json = options.getJSONObject(rg.getCheckedRadioButtonId());
+            resultJsonObj.put("option_id",json.getString("id"));
 
             resultJsonObj.remove("status");
-            resultJsonObj.put("status","taken");
-
+            resultJsonObj.put("status","1");
           }
           break;
 
         case R.id.quiz_btnSkip:
-          resultJsonObj.put("question_id",qID);
-          radioBtnId[questionCnt] = 0;
+          resultJsonObj.put("q_id",qID);
+          radioBtnId[questionCnt] = -1;
           questionCnt++;
           resultJsonObj.remove("status");
-          resultJsonObj.put("status","skipped");
+          resultJsonObj.put("status","0");
           break;
 
         case R.id.quiz_btnNavSwitch:
@@ -267,7 +260,7 @@ public class QuizActivity extends Activity implements View.OnClickListener {
     super.onSaveInstanceState(outState);
     outState.putInt("questionCnt", questionCnt);
     outState.putString("responseArr",responseArr.toString());
-    outState.putString("responseArr",options.toString());
+    outState.putString("options",options.toString());
     outState.putString("resultArr",resultArr.toString());
     outState.putInt("radioBtnID",rg.getCheckedRadioButtonId());
     outState.putSerializable("radioBtnId", radioBtnId);
@@ -327,12 +320,11 @@ public class QuizActivity extends Activity implements View.OnClickListener {
 
       JSONObject responseObj = responseArr.getJSONObject(questionCnt);
       no_of_questions = responseArr.length();
-      qID = Integer.parseInt(responseObj.getString("question_id"));
-      txtQuizQuestionNo.setText(Integer.toString(questionCnt+1));
-      txtQuizQuestion.setText(responseObj.getString("question"));
+      qID = Integer.parseInt(responseObj.getString("id"));
+      txtQuizQuestion.setText(responseObj.getString("title"));
       txtQuestionProgress.setText(questionCnt+1+" of "+no_of_questions);
 
-      progressbarQuestionStatus.setProgress(100/(2/(questionCnt+1)));
+      progressbarQuestionStatus.setProgress(100/no_of_questions*(questionCnt+1));
 
       options = responseObj.getJSONArray("options");
       rg.clearCheck();
@@ -343,18 +335,20 @@ public class QuizActivity extends Activity implements View.OnClickListener {
         RadioGroup.LayoutParams params_soiled = new RadioGroup.LayoutParams(getBaseContext(), null);
         params_soiled.setMargins(0,5,0,5);
 
-        RadioButton rdBtn = new RadioButton(this);
+        final RadioButton rdBtn = new RadioButton(this);
         rdBtn.setId(i);
         rdBtn.setText(String.valueOf(Character.toChars(65 + i)) + ". " + json.getString("option"));
+        rdBtn.setTextColor(getResources().getColor(R.color.black));
         rdBtn.setButtonDrawable(new StateListDrawable());
         rdBtn.setBackgroundResource(R.drawable.radio);
-        rdBtn.setPadding(10, 10, 10, 10);
-        rdBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        rdBtn.setPadding(10, 10, 10, 15);
+        rdBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
         rdBtn.setLayoutParams(params_soiled);
+        rdBtn.setWidth(500);
         rdBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
           @Override
           public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-
+            radioTextColorChange(b,rdBtn);
           }
         });
         if(radioBtnId[questionCnt] != null && radioBtnId[questionCnt] == i)
@@ -366,7 +360,7 @@ public class QuizActivity extends Activity implements View.OnClickListener {
       if(radioBtnId[questionCnt] != null){
         btnSkip.setVisibility(View.GONE);
       }else{
-        resultJsonObj.put("status","activated");
+        resultJsonObj.put("status","2");
         resultArr.put(questionCnt,resultJsonObj);
         btnSkip.setVisibility(View.VISIBLE);
       }
@@ -401,7 +395,7 @@ public class QuizActivity extends Activity implements View.OnClickListener {
     Integer rowLength = quizArray.length()/3;
     Integer quizLength = quizArray.length();
     float d = getApplicationContext().getResources().getDisplayMetrics().density;
-    for(int i = 1; i<= rowLength+1; i++ ){
+    for(int i = 1; i<= rowLength; i++ ){
       TableRow row = new TableRow(this);
       row.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,
           TableRow.LayoutParams.WRAP_CONTENT));
@@ -418,13 +412,14 @@ public class QuizActivity extends Activity implements View.OnClickListener {
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
         tv.setGravity(Gravity.CENTER);
         tv.setMinWidth(50);
+        tv.setMinHeight(50);
         if(resultArr.length() != 0){
           try{
             if(!resultArr.isNull(cnt-1)) {
               JSONObject json = resultArr.getJSONObject(cnt - 1);
-              if (json.getString("status").equals("taken"))
+              if (json.getString("status").equals("1"))
                 tv.setBackgroundResource(R.drawable.taken);
-              else if (json.getString("status").equals("skipped"))
+              else if (json.getString("status").equals("0"))
                 tv.setBackgroundResource(R.drawable.skiped);
             }
           }catch (JSONException e){
@@ -446,9 +441,9 @@ public class QuizActivity extends Activity implements View.OnClickListener {
         ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) tv.getLayoutParams();
 
         params.rightMargin = 4;
+        params.bottomMargin = 4;
         tv.setLayoutParams(params);
         row.addView(tv);
-
         if(quizLength == cnt)
           break;
         cnt++;
@@ -460,7 +455,7 @@ public class QuizActivity extends Activity implements View.OnClickListener {
   private void postData(){
 
     if(CommonFunctions.checkNetworkConnection(this)){
-      StringRequest postRequest = new StringRequest(Request.Method.POST,Constants.urlQuizUserSave, new Response.Listener<String>() {
+      StringRequest postRequest = new StringRequest(Request.Method.POST,Constants.urlQuizSubmit, new Response.Listener<String>() {
         @Override
         public void onResponse(String response) {
         }
@@ -494,7 +489,7 @@ public class QuizActivity extends Activity implements View.OnClickListener {
   }
 
   private void startCompletionActivity(){
-//    postData();
+    postData();
     Intent i = new Intent(getApplicationContext(),CompletionActivity.class);
     startActivity(i);
     finish();
@@ -505,6 +500,7 @@ public class QuizActivity extends Activity implements View.OnClickListener {
     super.onDestroy();
     unregisterReceiver(broadcastReceiver);
     if(isFinishing()){
+      Log.e("Destroy","Stop service");
       Intent intentService = new Intent(this, TimerService.class);
       stopService(intentService);
     }

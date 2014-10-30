@@ -2,7 +2,6 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-
                 android:scrollbars="vertical"
                 tools:context="com.example.addgrievance.MainActivity"
                 android:background="#f2f2f2">
@@ -24,6 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=" 00:00:00"
+        android:textColor="#81888d"
         android:id="@+id/quiz_txtTimer"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
@@ -67,60 +67,27 @@
           android:paddingBottom="10dp"
           android:paddingLeft="10dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="MCQ's for Developers"
-            android:id="@+id/quiz_txtMCQ"
-            android:textSize="12sp"
-            android:textColor="#81888d"
-            android:layout_alignRight="@+id/linearLayout"
-            android:layout_alignEnd="@+id/linearLayout" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Question"
-            android:id="@+id/quiz_txtLabelQuestion1"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:textSize="20sp"
-            android:gravity="bottom"
-            android:layout_below="@+id/quiz_txtMCQ"
-            android:textColor="#81888d" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="5"
-            android:id="@+id/quiz_txtQuestionNo"
-            android:layout_toEndOf="@+id/quiz_txtLabelQuestion1"
-            android:textSize="20sp"
-            android:textColor="#81888d"
-            android:layout_above="@+id/linearLayout"
-            android:layout_toRightOf="@+id/quiz_txtLabelQuestion1"
-            android:layout_marginLeft="5dp" />
-
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/linearLayout"
             android:gravity="left|top"
-            android:layout_below="@+id/quiz_txtLabelQuestion1"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="55dp"
             android:paddingTop="10dp"
             android:paddingRight="10dp"
             android:paddingBottom="10dp">
 
           <TextView
-              android:layout_width="321dp"
+              android:layout_width="fill_parent"
               android:layout_height="0dp"
               android:textAppearance="?android:attr/textAppearanceLarge"
-              android:text="The DBMS acts as an interface between what two components of an enterprise-class database system?"
+              android:text=""
+              android:textColor="@android:color/background_dark"
               android:id="@+id/quiz_txtQuestion"
-              android:textSize="12sp"
+              android:textSize="22sp"
               android:layout_marginBottom="5dp"
               android:layout_weight="1" />
 
@@ -141,8 +108,10 @@
               android:textAllCaps="true"
               android:background="@drawable/custom_navigator"
               android:textColor="#ffffff"
-              android:textSize="12sp"
+              android:textSize="20sp"
               android:minHeight="36dp"
+              android:paddingLeft="10dp"
+              android:paddingRight="10dp"
               android:layout_below="@+id/quiz_txtOption4"
               android:layout_alignParentLeft="true"
               android:layout_alignParentStart="true"
@@ -157,13 +126,13 @@
               android:textAllCaps="true"
               android:background="@drawable/custom_navigator"
               android:textColor="#ffffff"
-              android:textSize="12sp"
+              android:textSize="20sp"
               android:minHeight="36dp"
               android:layout_below="@+id/quiz_txtOption4"
               android:layout_alignParentRight="true"
               android:layout_alignParentEnd="true"
               android:layout_marginTop="-37dp"
-              android:layout_marginLeft="80dp"
+              android:layout_marginLeft="110dp"
               android:layout_weight="1" />
         </LinearLayout>
 
@@ -194,7 +163,8 @@
               android:paddingRight="20dp"
               android:paddingBottom="10dp"
               android:id="@+id/frameNavigator"
-              android:visibility="gone">
+              android:visibility="gone"
+              android:minWidth="200dp">
 
             <TextView
                 android:layout_width="match_parent"
@@ -271,6 +241,7 @@
         android:id="@+id/quiz_txtQLabel"
         android:layout_gravity="left"
         android:textSize="12sp"
+        android:textColor="#81888d"
         android:layout_above="@+id/questionProgress"
         android:layout_alignLeft="@+id/questionProgress"
         android:layout_alignStart="@+id/questionProgress" />
@@ -278,10 +249,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="5 of 15"
+        android:text=""
         android:id="@+id/quiz_txtCurrentQuestion"
         android:layout_gravity="center"
         android:textSize="12sp"
+        android:textColor="#81888d"
         android:layout_toEndOf="@+id/quiz_txtQLabel"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/quiz_txtQLabel"
@@ -291,11 +263,14 @@
     <ProgressBar
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="5dp"
         android:id="@+id/questionProgress"
         android:layout_gravity="left|bottom"
         android:layout_below="@+id/quiz_txtCurrentQuestion"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:progressDrawable="@drawable/progress_style"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"/>
   </RelativeLayout>
 
 </RelativeLayout><!-- From: file:/E:/Projects/FB/AddGrievance/app/src/main/res/layout/quiz.xml -->

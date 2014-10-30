@@ -1,10 +1,13 @@
 package quiz.fw.com.utils;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.CountDownTimer;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -108,12 +111,16 @@ public class CommonFunctions {
   }
 
   // validating email id
-  public static boolean isValidEmail(String email) {
-    String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
-        + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+  public final static boolean isValidEmail(CharSequence target) {
+    return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+  }
 
-    Pattern pattern = Pattern.compile(EMAIL_PATTERN);
-    Matcher matcher = pattern.matcher(email);
-    return matcher.matches();
+  public static void hideKeyboard(Activity activity)
+  {
+    if (activity != null && activity.getWindow() != null && activity.getWindow().getDecorView() != null)
+    {
+      InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+      imm.hideSoftInputFromWindow(activity.getWindow().getDecorView().getWindowToken(), 0);
+    }
   }
 }

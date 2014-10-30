@@ -12,9 +12,9 @@ public class Constants {
 //    public static final String baseUrl = "http://staging.focalworks.in/intranet/public/";
 //  public static final String baseUrl = "http://192.168.3.170/focalworks-intranet/public/";
 //  public static final String baseUrl = "http://192.168.3.79/focalworks-intranet/public/";
-  private static final String baseUrl = "http://192.168.3.75/focalworks-intranet/public/";
+  public static final String baseUrl = "http://192.168.3.115/focalworks-intranet/public/";
 
-  public static final String urlQuizQuestion = baseUrl + "quiz/get_quiz_questisons/php";
-  public static final String urlQuizUserSave = baseUrl + "quiz/user_save";
+  public static final String urlQuizQuestion = baseUrl + "assessment-api/test";
+  public static final String urlQuizSubmit = baseUrl + "assessment-api/submit-assessment";
 
 }

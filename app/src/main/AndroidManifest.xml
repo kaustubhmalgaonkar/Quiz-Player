@@ -14,7 +14,8 @@
     <activity
         android:name=".quiz.RegistrationActivity"
         android:label="@string/app_name"
-        android:windowSoftInputMode="stateHidden">
+        android:windowSoftInputMode="stateHidden"
+        android:configChanges="orientation|screenSize|keyboardHidden">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
@@ -28,7 +29,8 @@
     <activity
         android:name=".quiz.CompletionActivity"
         android:label="@string/app_name"
-        android:windowSoftInputMode="stateHidden">
+        android:windowSoftInputMode="stateHidden"
+        android:theme="@style/Transparent">
     </activity>
     <service
         android:name=".utils.TimerService"

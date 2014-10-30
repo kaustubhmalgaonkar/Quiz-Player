@@ -2,6 +2,38 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:background="#f2f2f2">
+  <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="#e5e4e4"
+      android:padding="10dp"
+      android:id="@+id/frameLayout4">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:background="@drawable/logo" />
+
+  </FrameLayout>
+
+  <ImageView
+      android:id="@+id/img_ticker"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:src="@drawable/ticker"
+      android:layout_centerInParent="true"
+      android:padding="10dp"/>
+
+  <TextView
+      android:id="@+id/txtCompletionText"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/img_ticker"
+      android:text="Thank you for taking Quiz"
+      android:textSize="25sp"
+      android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>
