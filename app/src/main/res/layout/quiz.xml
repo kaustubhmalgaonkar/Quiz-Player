@@ -6,7 +6,7 @@
                 tools:context="com.example.addgrievance.MainActivity"
                 android:background="#f2f2f2">
 
-  <FrameLayout
+  <RelativeLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:background="#e5e4e4"
@@ -19,6 +19,14 @@
         android:id="@+id/imageView"
         android:background="@drawable/logo" />
 
+    <pl.droidsonroids.gif.GifImageView
+        android:layout_width="22sp"
+        android:layout_height="22sp"
+        android:id="@+id/imageClock"
+        android:src="@drawable/clock"
+        android:layout_marginTop="8dp"
+        android:layout_toLeftOf="@+id/quiz_txtTimer"/>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,11 +36,12 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="8dp"
         android:layout_gravity="right|center_vertical"
-        android:textSize="12sp"
-        android:drawableLeft="@drawable/time" />
+        android:textSize="20sp"/>
 
-  </FrameLayout>
+  </RelativeLayout>
 
   <ScrollView
       android:id="@+id/scrollView1"
@@ -240,7 +249,7 @@
         android:text="Question:"
         android:id="@+id/quiz_txtQLabel"
         android:layout_gravity="left"
-        android:textSize="12sp"
+        android:textSize="18sp"
         android:textColor="#81888d"
         android:layout_above="@+id/questionProgress"
         android:layout_alignLeft="@+id/questionProgress"
@@ -252,7 +261,7 @@
         android:text=""
         android:id="@+id/quiz_txtCurrentQuestion"
         android:layout_gravity="center"
-        android:textSize="12sp"
+        android:textSize="18sp"
         android:textColor="#81888d"
         android:layout_toEndOf="@+id/quiz_txtQLabel"
         android:layout_alignParentTop="true"
@@ -273,4 +282,4 @@
         android:layout_marginBottom="10dp"/>
   </RelativeLayout>
 
-</RelativeLayout><!-- From: file:/E:/Projects/FB/AddGrievance/app/src/main/res/layout/quiz.xml -->
+</RelativeLayout>

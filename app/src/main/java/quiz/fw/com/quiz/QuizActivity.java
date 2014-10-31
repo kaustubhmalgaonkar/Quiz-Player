@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -337,7 +338,7 @@ public class QuizActivity extends Activity implements View.OnClickListener {
 
         final RadioButton rdBtn = new RadioButton(this);
         rdBtn.setId(i);
-        rdBtn.setText(String.valueOf(Character.toChars(65 + i)) + ". " + json.getString("option"));
+        rdBtn.setText(String.valueOf(Character.toChars(65 + i)) + ". " + Html.fromHtml(json.getString("option")));
         rdBtn.setTextColor(getResources().getColor(R.color.black));
         rdBtn.setButtonDrawable(new StateListDrawable());
         rdBtn.setBackgroundResource(R.drawable.radio);

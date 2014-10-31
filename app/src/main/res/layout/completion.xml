@@ -4,7 +4,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="#f2f2f2">
-  <FrameLayout
+  <RelativeLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:background="#e5e4e4"
@@ -15,9 +15,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/imageView"
-        android:background="@drawable/logo" />
+        android:background="@drawable/logo"/>
 
-  </FrameLayout>
+  </RelativeLayout>
 
   <ImageView
       android:id="@+id/img_ticker"
@@ -25,7 +25,8 @@
       android:layout_height="wrap_content"
       android:src="@drawable/ticker"
       android:layout_centerInParent="true"
-      android:padding="10dp"/>
+      android:padding="10dp"
+      android:scaleType="centerCrop"/>
 
   <TextView
       android:id="@+id/txtCompletionText"
