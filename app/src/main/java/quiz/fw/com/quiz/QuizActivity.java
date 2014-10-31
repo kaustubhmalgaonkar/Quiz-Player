@@ -1,9 +1,11 @@
 package quiz.fw.com.quiz;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
@@ -78,6 +80,7 @@ public class QuizActivity extends Activity implements View.OnClickListener {
   private Integer qID;
   private Integer [] radioBtnId;
   private String designation;
+  AlertDialog alert11;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -260,31 +263,39 @@ public class QuizActivity extends Activity implements View.OnClickListener {
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     outState.putInt("questionCnt", questionCnt);
-    outState.putString("responseArr",responseArr.toString());
-    outState.putString("options",options.toString());
-    outState.putString("resultArr",resultArr.toString());
-    outState.putInt("radioBtnID",rg.getCheckedRadioButtonId());
-    outState.putSerializable("radioBtnId", radioBtnId);
+    if(responseArr != null && resultArr != null && options != null && radioBtnId != null) {
+      outState.putString("responseArr", responseArr.toString());
+      outState.putString("options", options.toString());
+      outState.putString("resultArr", resultArr.toString());
+      outState.putInt("radioBtnID", rg.getCheckedRadioButtonId());
+      outState.putSerializable("radioBtnId", radioBtnId);
+    }else{
+      alert11.dismiss();
+    }
   }
 
   @Override
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
     questionCnt = savedInstanceState.getInt("questionCnt");
-    try {
-      responseArr = new JSONArray(savedInstanceState.getString("responseArr"));
-      options = new JSONArray(savedInstanceState.getString("options"));
-      resultArr = new JSONArray(savedInstanceState.getString("resultArr"));
-      generateNavigator(responseArr);
-    }catch (JSONException e){
-      Log.e("JSON Error Save Instance",e.toString());
-    }
-    radioBtnId = new Integer[responseArr.length()];
-    radioBtnId = (Integer [])savedInstanceState.getSerializable("radioBtnId");
-    loadQuestion(questionCnt);
-    if(savedInstanceState.getInt("radioBtnID") != -1){
-      RadioButton rBtn=(RadioButton)rg.findViewById(savedInstanceState.getInt("radioBtnID"));
-      rBtn.setChecked(true);
+    if(savedInstanceState.getString("responseArr") != null){
+      try {
+        responseArr = new JSONArray(savedInstanceState.getString("responseArr"));
+        options = new JSONArray(savedInstanceState.getString("options"));
+        resultArr = new JSONArray(savedInstanceState.getString("resultArr"));
+        generateNavigator(responseArr);
+      }catch (JSONException e){
+        Log.e("JSON Error Save Instance",e.toString());
+      }
+      radioBtnId = new Integer[responseArr.length()];
+      radioBtnId = (Integer [])savedInstanceState.getSerializable("radioBtnId");
+      loadQuestion(questionCnt);
+      if(savedInstanceState.getInt("radioBtnID") != -1){
+        RadioButton rBtn=(RadioButton)rg.findViewById(savedInstanceState.getInt("radioBtnID"));
+        rBtn.setChecked(true);
+      }else{
+        showPopup();
+      }
     }
   }
 
@@ -306,12 +317,38 @@ public class QuizActivity extends Activity implements View.OnClickListener {
       public void onErrorResponse(VolleyError error) {
         VolleyLog.d(TAG, "Error: " + error.getMessage());
         hideProgressDialog();
+        showPopup();
       }
     });
 
     // Adding request to request queue
     AppController.getInstance().addToRequestQueue(req,
         Constants.tag_json_arry);
+  }
+
+  public void showPopup(){
+    AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+    builder1.setMessage("Failed to retrieve Questions.");
+    builder1.setCancelable(true);
+    builder1.setPositiveButton("Retry",
+        new DialogInterface.OnClickListener(){
+          public void onClick(DialogInterface dialog, int id) {
+            destroyService();
+            makeJsonArrayReq();
+            dialog.cancel();
+          }
+        });
+    builder1.setNegativeButton("Cancel",
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int id) {
+            destroyService();
+            dialog.cancel();
+            finish();
+          }
+        });
+
+    alert11 = builder1.create();
+    alert11.show();
   }
 
   public void loadQuestion(Integer questionCnt){
@@ -499,7 +536,13 @@ public class QuizActivity extends Activity implements View.OnClickListener {
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    unregisterReceiver(broadcastReceiver);
+    destroyService();
+  }
+
+  protected void destroyService(){
+    if (broadcastReceiver != null) {
+      unregisterReceiver(broadcastReceiver);
+    }
     if(isFinishing()){
       Log.e("Destroy","Stop service");
       Intent intentService = new Intent(this, TimerService.class);
