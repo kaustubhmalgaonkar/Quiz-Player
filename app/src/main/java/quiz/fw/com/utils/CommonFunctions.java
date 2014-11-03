@@ -123,4 +123,5 @@ public class CommonFunctions {
       imm.hideSoftInputFromWindow(activity.getWindow().getDecorView().getWindowToken(), 0);
     }
   }
+
 }

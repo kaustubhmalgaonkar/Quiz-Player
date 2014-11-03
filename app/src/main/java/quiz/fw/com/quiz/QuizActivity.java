@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
@@ -81,6 +82,7 @@ public class QuizActivity extends Activity implements View.OnClickListener {
   private Integer [] radioBtnId;
   private String designation;
   AlertDialog alert11;
+  private BroadcastReceiver broadcastReceiver;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -167,6 +169,17 @@ public class QuizActivity extends Activity implements View.OnClickListener {
 
       }
     });
+    broadcastReceiver = new BroadcastReceiver(){
+      @Override
+      public void onReceive(Context context, Intent intent){
+        String time = intent.getStringExtra("time");
+        if(!time.equals("finish")){
+          txtTimer.setText(time);
+        }else{
+          startCompletionActivity();
+        }
+      }
+    };
 
     registerReceiver(broadcastReceiver, new IntentFilter(TimerService.BROADCAST_ACTION));
     if(savedInstanceState == null) {
@@ -186,18 +199,6 @@ public class QuizActivity extends Activity implements View.OnClickListener {
       radioBtn.setTextColor(getResources().getColor(R.color.black));
     }
   }
-
-  private BroadcastReceiver broadcastReceiver = new BroadcastReceiver(){
-    @Override
-    public void onReceive(Context context, Intent intent){
-      String time = intent.getStringExtra("time");
-      if(!time.equals("finish")){
-        txtTimer.setText(time);
-      }else{
-        startCompletionActivity();
-      }
-    }
-  };
 
   @Override
   public void onClick(View view) {
@@ -269,7 +270,7 @@ public class QuizActivity extends Activity implements View.OnClickListener {
       outState.putString("resultArr", resultArr.toString());
       outState.putInt("radioBtnID", rg.getCheckedRadioButtonId());
       outState.putSerializable("radioBtnId", radioBtnId);
-    }else{
+    }else if (alert11 != null){
       alert11.dismiss();
     }
   }
@@ -293,9 +294,9 @@ public class QuizActivity extends Activity implements View.OnClickListener {
       if(savedInstanceState.getInt("radioBtnID") != -1){
         RadioButton rBtn=(RadioButton)rg.findViewById(savedInstanceState.getInt("radioBtnID"));
         rBtn.setChecked(true);
-      }else{
-        showPopup();
       }
+    }else{
+      showPopup();
     }
   }
 
@@ -329,7 +330,7 @@ public class QuizActivity extends Activity implements View.OnClickListener {
   public void showPopup(){
     AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
     builder1.setMessage("Failed to retrieve Questions.");
-    builder1.setCancelable(true);
+    builder1.setCancelable(false);
     builder1.setPositiveButton("Retry",
         new DialogInterface.OnClickListener(){
           public void onClick(DialogInterface dialog, int id) {
@@ -341,8 +342,10 @@ public class QuizActivity extends Activity implements View.OnClickListener {
     builder1.setNegativeButton("Cancel",
         new DialogInterface.OnClickListener() {
           public void onClick(DialogInterface dialog, int id) {
-            destroyService();
             dialog.cancel();
+            db.deleteRecord(userID);
+            Intent i = new Intent(getApplicationContext(),RegistrationActivity.class);
+            startActivity(i);
             finish();
           }
         });
@@ -496,10 +499,13 @@ public class QuizActivity extends Activity implements View.OnClickListener {
       StringRequest postRequest = new StringRequest(Request.Method.POST,Constants.urlQuizSubmit, new Response.Listener<String>() {
         @Override
         public void onResponse(String response) {
+          db.deleteRecord(userID);
+          Log.e("Response",response);
         }
       }, new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
+          Log.e("Error Response",error.toString());
         }
       }){
         @Override
@@ -539,10 +545,13 @@ public class QuizActivity extends Activity implements View.OnClickListener {
     destroyService();
   }
 
+  @Override
+  protected void onStop() {
+    super.onStop();
+    unregisterReceiver(broadcastReceiver);
+  }
+
   protected void destroyService(){
-    if (broadcastReceiver != null) {
-      unregisterReceiver(broadcastReceiver);
-    }
     if(isFinishing()){
       Log.e("Destroy","Stop service");
       Intent intentService = new Intent(this, TimerService.class);

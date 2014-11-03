@@ -91,4 +91,12 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     return userData;
   }
+
+  //Delete Single Record
+  public void deleteRecord(int id){
+    SQLiteDatabase db = this.getReadableDatabase();
+    db.delete(TABLE_USER_DETAIL, KEY_UID + " = ?",
+        new String[] { String.valueOf(id) });
+    db.close();
+  }
 }
