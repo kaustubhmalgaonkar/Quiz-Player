@@ -10,11 +10,12 @@ public class Constants {
   public static String tag_json_obj = "jobj_req";
 
 //  public static final String baseUrl = "http://staging.focalworks.in/intranet/public/";
-    public static final String baseUrl = "http://192.168.3.170/focalworks-intranet/public/";
+//    public static final String baseUrl = "http://192.168.3.170/focalworks-intranet/public/";
 //  public static final String baseUrl = "http://192.168.3.79/focalworks-intranet/public/";
-//  public static final String baseUrl = "http://192.168.3.115/focalworks-intranet/public/";
+  public static final String baseUrl = "http://192.168.3.115/focalworks-intranet/public/";
 
   public static final String urlQuizQuestion = baseUrl + "assessment-api/test";
   public static final String urlQuizSubmit = baseUrl + "assessment-api/submit-assessment";
+  public static final String urlQuizTags = "http://staging.focalworks.in/intranet/public/api/questions-list";
 
 }

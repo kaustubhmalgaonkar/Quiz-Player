@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -28,8 +29,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +42,7 @@ import quiz.fw.com.R;
 import quiz.fw.com.controller.AppController;
 import quiz.fw.com.utils.CommonFunctions;
 import quiz.fw.com.utils.Constants;
+import quiz.fw.com.utils.SpinnerAdapter;
 
 public class RegistrationActivity extends Activity {
 
@@ -47,6 +51,10 @@ public class RegistrationActivity extends Activity {
   Button btnSubmit;
   DatabaseHelper db;
   RelativeLayout rl;
+  JSONArray tags;
+  String [] tagsList;
+  String [] tagsId;
+  String designation;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -70,29 +78,20 @@ public class RegistrationActivity extends Activity {
     etPhone = (EditText) findViewById(R.id.reg_edtPhone);
 
     spPostApplied = (Spinner) findViewById(R.id.reg_selectPost);
-    spPostApplied.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-      @Override
-      public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-        spPostApplied.getItemAtPosition(position);
-      }
-
-      @Override
-      public void onNothingSelected(AdapterView<?> adapterView) {
-
-      }
-    });
+    // Spinner adapter
+    getTagsJsonObject();
 
     btnSubmit =(Button) findViewById(R.id.reg_btnSubmit);
     btnSubmit.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         if(checkValidation()){
-          long insertedId = db.addUserDetails(new Quiz(etName.getText().toString(), etEmail.getText().toString(), etPhone.getText().toString(), spPostApplied.getSelectedItem().toString()));
+          long insertedId = db.addUserDetails(new Quiz(etName.getText().toString(), etEmail.getText().toString(), etPhone.getText().toString(), designation));
           if (insertedId != -1) {
             Toast.makeText(getApplicationContext(), "Data Saved Successfully", Toast.LENGTH_LONG).show();
             Intent intent = new Intent(getApplicationContext(), QuizActivity.class);
             intent.putExtra("userID",Long.toString(insertedId));
-            intent.putExtra("designation", spPostApplied.getSelectedItem().toString());
+            intent.putExtra("designation", designation);
             startActivity(intent);
             finish();
           }
@@ -163,5 +162,49 @@ public class RegistrationActivity extends Activity {
         CommonFunctions.hideKeyboard(this);
     }
     return super.dispatchTouchEvent(ev);
+  }
+
+  public void getTagsJsonObject(){
+    JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, Constants.urlQuizTags, null,
+        new Response.Listener<JSONObject>()
+        {
+          @Override
+          public void onResponse(JSONObject response) {
+            try {
+              // display response
+              tagsList = new String[response.names().length()];
+              tagsId = new String[response.names().length()];
+              int len= response.names().length();
+              for (int i = 0; i < len ; i++) {
+                tagsId[i] = response.names().getString(i);
+                tagsList[i] = response.getString(response.names().getString(i));
+              }
+              spPostApplied.setAdapter(new SpinnerAdapter(RegistrationActivity.this,R.layout.spinner_item,tagsList));
+              spPostApplied.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                  designation = tagsId[position];
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+              });
+            }catch (Exception e){
+              Log.e("Tag Exception",e.toString());
+            }
+          }
+        },
+        new Response.ErrorListener()
+        {
+          @Override
+          public void onErrorResponse(VolleyError error) {
+            Log.d("Error.Response", error.toString());
+          }
+        }
+    );
+    // add it to the RequestQueue
+    AppController.getInstance().addToRequestQueue(getRequest);
   }
 }
