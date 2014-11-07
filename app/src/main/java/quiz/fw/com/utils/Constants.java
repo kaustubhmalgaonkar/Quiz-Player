@@ -16,6 +16,6 @@ public class Constants {
 
   public static final String urlQuizQuestion = baseUrl + "assessment-api/test";
   public static final String urlQuizSubmit = baseUrl + "assessment-api/submit-assessment";
-  public static final String urlQuizTags = "http://staging.focalworks.in/intranet/public/api/questions-list";
+  public static final String urlQuizTags = baseUrl + "assessment-api/tags";
 
 }
