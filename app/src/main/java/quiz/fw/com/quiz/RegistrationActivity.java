@@ -40,6 +40,7 @@ import quiz.fw.com.Database.DatabaseHelper;
 import quiz.fw.com.Database.Quiz;
 import quiz.fw.com.R;
 import quiz.fw.com.controller.AppController;
+import quiz.fw.com.optionsTemplate.OptionsPagerActivity;
 import quiz.fw.com.utils.CommonFunctions;
 import quiz.fw.com.utils.Constants;
 import quiz.fw.com.utils.SpinnerAdapter;
@@ -89,7 +90,8 @@ public class RegistrationActivity extends Activity {
           long insertedId = db.addUserDetails(new Quiz(etName.getText().toString(), etEmail.getText().toString(), etPhone.getText().toString(), designation));
           if (insertedId != -1) {
             Toast.makeText(getApplicationContext(), "Data Saved Successfully", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(getApplicationContext(), QuizActivity.class);
+//            Intent intent = new Intent(getApplicationContext(), QuizActivity.class);
+            Intent intent = new Intent(getApplicationContext(), OptionsPagerActivity.class);
             intent.putExtra("userID",Long.toString(insertedId));
             intent.putExtra("designation", designation);
             startActivity(intent);
