@@ -15,8 +15,13 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,8 +79,8 @@ public class OptionsPagerActivity extends Activity implements ViewPager.PageTran
 
     Intent extras = getIntent();
     if (extras != null) {
-      /*userID = Integer.parseInt(extras.getStringExtra("userID"));
-      designation = extras.getStringExtra("designation");*/
+      userID = Integer.parseInt(extras.getStringExtra("userID"));
+      designation = extras.getStringExtra("designation");
     }
 
     pDialog = new ProgressDialog(this);
@@ -331,8 +336,8 @@ public class OptionsPagerActivity extends Activity implements ViewPager.PageTran
   }
 
   public void updateUserData(JSONArray resultArr){
-    /*db.updateUserResult(userID,resultArr.toString());
-    startCompletionActivity();*/
+    db.updateUserResult(userID,resultArr.toString());
+    startCompletionActivity();
   }
 
   public void startCompletionActivity(){

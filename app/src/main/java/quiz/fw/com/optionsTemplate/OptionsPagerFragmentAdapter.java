@@ -13,14 +13,20 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,6 +53,10 @@ public class OptionsPagerFragmentAdapter extends PagerAdapter{
   Integer no_of_questions;
   RadioGroup rg;
   public int [] radioBtnId,navStatus,questionId;
+  ImageButton btnNavigator;
+  FrameLayout frameNavigator;
+  RelativeLayout relativeNavigator;
+  private Animation slideRight, slideLeft,fade_in, fade_out;
 
   public OptionsPagerFragmentAdapter(OptionsPagerActivity activity, JSONArray responseArr) {
     this.activity = activity;
@@ -84,9 +94,76 @@ public class OptionsPagerFragmentAdapter extends PagerAdapter{
       @Override
       public void onClick(View view) {
         updateStatus(position);
-        activity.setCurrentPage(position + 1);
+        activity.updateUserData(resultArr);
       }
     });
+
+    if(itemView.findViewById(R.id.quiz_btnNavSwitch) != null){
+      btnNavigator = (ImageButton) itemView.findViewById(R.id.quiz_btnNavSwitch);
+      btnNavigator.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+          frameNavigator = (FrameLayout) itemView.findViewById(R.id.frameNavigator);
+          relativeNavigator = (RelativeLayout) itemView.findViewById(R.id.navigatorLayout);
+
+          fade_in = AnimationUtils.loadAnimation(activity, R.anim.fade_in);
+          fade_out = AnimationUtils.loadAnimation(activity, R.anim.fade_out);
+
+          slideLeft = AnimationUtils.loadAnimation(activity, R.anim.slide_left);
+          slideLeft.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+              btnNavigator.setVisibility(View.VISIBLE);
+              btnNavigator.startAnimation(fade_in);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+          });
+
+          slideRight = AnimationUtils.loadAnimation(activity, R.anim.slide_right);
+          slideRight.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+              btnNavigator.setVisibility(View.VISIBLE);
+              btnNavigator.startAnimation(fade_in);
+              frameNavigator.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+          });
+
+          RelativeLayout.LayoutParams params =
+              (RelativeLayout.LayoutParams)view.getLayoutParams();
+          if(frameNavigator.getVisibility() == View.GONE){
+            relativeNavigator.startAnimation(slideLeft);
+            frameNavigator.setVisibility(View.VISIBLE);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+            btnNavigator.setLayoutParams(params);
+            btnNavigator.setVisibility(View.GONE);
+          }else{
+            relativeNavigator.startAnimation(slideRight);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT,1);
+            btnNavigator.setLayoutParams(params);
+          }
+        }
+      });
+    }
 
     rg = (RadioGroup) itemView.findViewById(R.id.quiz_rgOpinion);
 
@@ -251,7 +328,9 @@ public class OptionsPagerFragmentAdapter extends PagerAdapter{
       try {
         resultJsonObj = new JSONObject();
         resultJsonObj.put("q_id", questionId[i]);
-        resultJsonObj.put("option_id", radioBtnId[i]);
+        if(radioBtnId[i] != -1)
+          resultJsonObj.put("option_id", radioBtnId[i]);
+
         resultJsonObj.put("status", navStatus[i]);
 
         resultArr.put(i,resultJsonObj);
@@ -259,7 +338,7 @@ public class OptionsPagerFragmentAdapter extends PagerAdapter{
         e.printStackTrace();
       }
     }
-    activity.updateUserData(resultArr);
+    Log.i("json",resultArr.toString());
   }
 
   public void updateStatus(int position){

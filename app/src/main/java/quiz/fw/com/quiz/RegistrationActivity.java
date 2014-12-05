@@ -28,6 +28,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -56,6 +58,8 @@ public class RegistrationActivity extends Activity {
   String [] tagsList;
   String [] tagsId;
   String designation;
+
+  ShowcaseView sv;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
